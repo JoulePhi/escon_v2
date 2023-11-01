@@ -1,3 +1,4 @@
+import 'package:escon_v2/app/modules/home/views/add_room.dart';
 import 'package:escon_v2/app/modules/home/views/baritem.dart';
 import 'package:escon_v2/app/modules/home/views/rooms.dart';
 import 'package:escon_v2/shared/utils.dart';
@@ -5,6 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 
 import '../controllers/home_controller.dart';
 
@@ -48,14 +50,24 @@ class HomeView extends GetView<HomeController> {
                     ],
                   ),
                   const Spacer(),
-                  Image.asset(
-                    'assets/images/bell.png',
-                    width: 26,
+                  GestureDetector(
+                    onTap: () {
+                      controller.clearRooms();
+                    },
+                    child: Image.asset(
+                      'assets/images/bell.png',
+                      width: 26,
+                    ),
                   ),
                   spaceH(24),
-                  Image.asset(
-                    'assets/images/add.png',
-                    width: 26,
+                  GestureDetector(
+                    onTap: () {
+                      controller.showSlideUpDialog(context);
+                    },
+                    child: Image.asset(
+                      'assets/images/add.png',
+                      width: 26,
+                    ),
                   ),
                 ],
               ),
@@ -79,16 +91,29 @@ class HomeView extends GetView<HomeController> {
                           ),
                         ),
                         const Spacer(),
-                        Image.asset(
-                          'assets/images/date.png',
-                          width: 18,
-                        ),
-                        spaceH(6),
-                        Text(
-                          '31 Oct, 2023',
-                          style: blackText.copyWith(
-                            fontSize: 14,
-                            fontWeight: medium,
+                        GestureDetector(
+                          onTap: () {
+                            controller.changeDate();
+                          },
+                          child: Row(
+                            children: [
+                              Image.asset(
+                                'assets/images/date.png',
+                                width: 18,
+                              ),
+                              spaceH(6),
+                              Obx(
+                                () => Text(
+                                  DateFormat('dd MMM, y')
+                                      .format(controller.selectedDate.value)
+                                      .toString(),
+                                  style: blackText.copyWith(
+                                    fontSize: 14,
+                                    fontWeight: medium,
+                                  ),
+                                ),
+                              )
+                            ],
                           ),
                         ),
                         spaceH(8),
@@ -200,89 +225,102 @@ class HomeView extends GetView<HomeController> {
               spaceV(40),
               GetBuilder(
                 init: HomeController(),
-                builder: (c) => Expanded(
-                  child: GridView.builder(
-                      physics: const BouncingScrollPhysics(),
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        mainAxisSpacing: 15,
-                        crossAxisSpacing: 15,
-                      ),
-                      itemCount: c.cards.length,
-                      itemBuilder: (context, index) {
-                        return Container(
-                          padding: const EdgeInsets.all(15),
-                          decoration: BoxDecoration(
-                            color: c.cards[index]['state'] == true
-                                ? donker
-                                : Colors.white,
-                            borderRadius: BorderRadius.circular(20),
+                builder: (c) => c.cards.isEmpty
+                    ? Expanded(
+                        child: Center(
+                          child: Text(
+                            'Your room still empty',
+                            style: greyText.copyWith(
+                              fontSize: 20,
+                              fontWeight: bold,
+                            ),
                           ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Container(
-                                width: 32,
-                                height: 32,
-                                padding: const EdgeInsets.all(5),
+                        ),
+                      )
+                    : Expanded(
+                        child: GridView.builder(
+                            physics: const BouncingScrollPhysics(),
+                            gridDelegate:
+                                const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              mainAxisSpacing: 15,
+                              crossAxisSpacing: 15,
+                            ),
+                            itemCount: c.cards.length,
+                            itemBuilder: (context, index) {
+                              return AnimatedContainer(
+                                duration: const Duration(milliseconds: 200),
+                                padding: const EdgeInsets.all(15),
                                 decoration: BoxDecoration(
                                   color: c.cards[index]['state'] == true
-                                      ? darkCyan
-                                      : lightCyan,
-                                  borderRadius: BorderRadius.circular(5),
+                                      ? donker
+                                      : Colors.white,
+                                  borderRadius: BorderRadius.circular(20),
                                 ),
-                                child: Image.asset(
-                                  c.cards[index]['image'].toString(),
-                                  color: c.cards[index]['state'] == true
-                                      ? Colors.white
-                                      : donker,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Container(
+                                      width: 32,
+                                      height: 32,
+                                      padding: const EdgeInsets.all(5),
+                                      decoration: BoxDecoration(
+                                        color: c.cards[index]['state'] == true
+                                            ? darkCyan
+                                            : lightCyan,
+                                        borderRadius: BorderRadius.circular(5),
+                                      ),
+                                      child: Image.asset(
+                                        'assets/images/${c.cards[index]['icon']}',
+                                        color: c.cards[index]['state'] == true
+                                            ? Colors.white
+                                            : donker,
+                                      ),
+                                    ),
+                                    spaceV(10),
+                                    Text(
+                                      c.cards[index]['name'].toString(),
+                                      style: c.cards[index]['state'] == true
+                                          ? whiteText.copyWith(
+                                              fontSize: 18,
+                                              fontWeight: bold,
+                                            )
+                                          : donkerText.copyWith(
+                                              fontSize: 18,
+                                              fontWeight: bold,
+                                            ),
+                                    ),
+                                    spaceV(5),
+                                    Text(
+                                      c.cards[index]['id'].toString(),
+                                      style: c.cards[index]['state'] == true
+                                          ? cyanText.copyWith(
+                                              fontSize: 14,
+                                              fontWeight: medium,
+                                            )
+                                          : greyText.copyWith(
+                                              fontSize: 14,
+                                              fontWeight: medium,
+                                            ),
+                                    ),
+                                    const Spacer(),
+                                    CupertinoSwitch(
+                                      value: c.cards[index]['state'] == true
+                                          ? true
+                                          : false,
+                                      onChanged: (a) {
+                                        c.cards[index]['state'] = a;
+                                        c.update();
+                                      },
+                                      activeColor: green,
+                                      thumbColor: Colors.white,
+                                      trackColor: donker,
+                                    ),
+                                  ],
                                 ),
-                              ),
-                              spaceV(10),
-                              Text(
-                                c.cards[index]['title'].toString(),
-                                style: c.cards[index]['state'] == true
-                                    ? whiteText.copyWith(
-                                        fontSize: 18,
-                                        fontWeight: bold,
-                                      )
-                                    : donkerText.copyWith(
-                                        fontSize: 18,
-                                        fontWeight: bold,
-                                      ),
-                              ),
-                              spaceV(5),
-                              Text(
-                                c.cards[index]['id'].toString(),
-                                style: c.cards[index]['state'] == true
-                                    ? cyanText.copyWith(
-                                        fontSize: 14,
-                                        fontWeight: medium,
-                                      )
-                                    : greyText.copyWith(
-                                        fontSize: 14,
-                                        fontWeight: medium,
-                                      ),
-                              ),
-                              const Spacer(),
-                              CupertinoSwitch(
-                                value: c.cards[index]['state'] == true
-                                    ? true
-                                    : false,
-                                onChanged: (a) {
-                                  c.cards[index]['state'] = a;
-                                  c.update();
-                                },
-                                activeColor: green,
-                                thumbColor: Colors.white,
-                                trackColor: donker,
-                              ),
-                            ],
-                          ),
-                        );
-                      }),
-                ),
+                              );
+                            }),
+                      ),
               )
             ],
           ),

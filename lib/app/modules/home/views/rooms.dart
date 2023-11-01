@@ -17,6 +17,21 @@ class RoomCard extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         Get.find<HomeController>().selectedRoom.value = id;
+        if (Get.find<HomeController>().box.get('rooms') != null) {
+          if (title != 'All Rooms') {
+            Get.find<HomeController>().cards = Get.find<HomeController>()
+                .box
+                .get('rooms')
+                .where((element) =>
+                    element['room'] == Get.find<HomeController>().rooms[id])
+                .toList();
+          } else {
+            Get.find<HomeController>().cards =
+                Get.find<HomeController>().box.get('rooms');
+          }
+        }
+
+        Get.find<HomeController>().update();
       },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 100),
